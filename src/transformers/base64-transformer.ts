@@ -7,6 +7,6 @@ export class Base64Transformer<TEntity> implements CursorTransformer<TEntity> {
   }
 
   stringify(cursor: Cursor<TEntity>): string {
-    return Buffer.from(JSON.stringify(cursor)).toString('base64').replace(/\=+$/, '')
+    return Buffer.from(JSON.stringify(cursor)).toString('base64').replace(/=+$/, '')
   }
 }
