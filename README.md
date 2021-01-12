@@ -18,3 +18,94 @@ npm install typeorm-paginator --save
 
 ## Usage
 
+### Cursor-based Pagination
+
+```typescript
+import { CursorPaginator } from 'typeorm-paginator'
+```
+
+Single cursor-based pagination.
+
+```typescript
+const paginator = new CursorPaginator(User, {
+  orderBy: {
+    id: false,
+  },
+})
+
+const pagination = await paginator.paginate(repoUsers.createQueryBuilder())
+
+expect(pagination).toEqual({
+  nodes: [
+    /*
+    User { id: 3 },
+    User { id: 2 },
+    User { id: 1 },
+    */
+  ],
+  hasPrev: false,
+  hasNext: false,
+  nextCursor: expect.any(String),
+  prevCursor: expect.any(String),
+})
+```
+
+
+Multi cursor-based pagination.
+
+```typescript
+const paginator = new CursorPaginator(User, {
+  orderBy: [
+    { name: true },
+    { id: false },
+  ],
+})
+
+const result = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2 })
+expect(result).toEqual({
+  nodes: [
+    User { id: 3, name: 'a' },
+    User { id: 5, name: 'b' },
+  ],
+  hasPrev: false,
+  hasNext: true,
+  prevCursor: expect.any(String),
+  nextCursor: expect.any(String),
+})
+
+const resultNext = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, nextCursor: result.nextCursor })
+expect(resultNext).toEqual({
+  nodes: [
+    User { id: 2, name: 'b' },
+    User { id: 6, name: 'c' },
+  ],
+  hasPrev: true,
+  hasNext: true,
+  prevCursor: expect.any(String),
+  nextCursor: expect.any(String),
+})
+
+const resultNextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, nextCursor: resultNext.nextCursor })
+expect(resultNextNext).toEqual({
+  nodes: [
+    User { id: 4, name: 'c' },
+    User { id: 1, name: 'c' },
+  ],
+  hasPrev: true,
+  hasNext: false,
+  prevCursor: expect.any(String),
+  nextCursor: expect.any(String),
+})
+
+const resultNextNextPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, prevCursor: resultNextNext.prevCursor })
+expect(resultNextNextPrev).toEqual({
+  nodes: [
+    User { id: 2, name: 'b' },
+    User { id: 6, name: 'c' },
+  ],
+  hasPrev: true,
+  hasNext: true,
+  prevCursor: expect.any(String),
+  nextCursor: expect.any(String),
+})
+```
