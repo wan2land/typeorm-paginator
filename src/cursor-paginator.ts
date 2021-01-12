@@ -5,15 +5,15 @@ import { Base64Transformer } from './transformers/base64-transformer'
 
 export interface CursorPaginatorParams<TEntity> {
   orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
-  columnNames?: ColumnNameMap<TEntity>
-  take?: number
-  transformer?: CursorTransformer<TEntity>
+  columnNames?: ColumnNameMap<TEntity> | null
+  take?: number | null
+  transformer?: CursorTransformer<TEntity> | null
 }
 
 export interface CursorPaginatorPaginateParams {
-  prevCursor?: string
-  nextCursor?: string
-  take?: number
+  prevCursor?: string | null
+  nextCursor?: string | null
+  take?: number | null
 }
 
 export class CursorPaginator<TEntity> {

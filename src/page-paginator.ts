@@ -4,13 +4,13 @@ import { OrderBy, ColumnNameMap, PagePagination } from './interfaces/paginator'
 
 export interface PagePaginatorParams<TEntity> {
   orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
-  columnNames?: ColumnNameMap<TEntity>
-  take?: number
+  columnNames?: ColumnNameMap<TEntity> | null
+  take?: number | null
 }
 
 export interface PagePaginatorPaginateParams {
-  page?: number
-  take?: number
+  page?: number | null
+  take?: number | null
 }
 
 export class PagePaginator<TEntity> {

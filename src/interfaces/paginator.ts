@@ -15,8 +15,8 @@ export interface CursorPagination<TEntity> {
   nodes: TEntity[]
   hasPrev: boolean
   hasNext: boolean
-  prevCursor?: string
-  nextCursor?: string
+  prevCursor?: string | null
+  nextCursor?: string | null
 }
 
 export interface CursorTransformer<TEntity> {
