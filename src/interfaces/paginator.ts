@@ -23,3 +23,8 @@ export interface CursorTransformer<TEntity> {
   parse(text: string): Cursor<TEntity>
   stringify(cursor: Cursor<TEntity>): string
 }
+
+export interface PagePagination<TEntity> {
+  nodes: TEntity[]
+  hasNext: boolean
+}

@@ -1,5 +1,5 @@
 import { Column, Connection, createConnection, Entity, PrimaryGeneratedColumn } from 'typeorm'
-import { CursorPaginator } from './cursor-paginator'
+import { PagePaginator } from './page-paginator'
 
 
 @Entity({ name: 'users' })
@@ -12,7 +12,7 @@ class User {
 }
 
 
-describe('testsuite of cursor-paginator', () => {
+describe('testsuite of page-paginator', () => {
   let connection: Connection
 
   beforeAll(async () => {
@@ -44,7 +44,7 @@ describe('testsuite of cursor-paginator', () => {
 
     await repoUsers.save(nodes)
 
-    const paginator = new CursorPaginator(User, {
+    const paginator = new PagePaginator(User, {
       orderBy: {
         id: false,
       },
@@ -60,14 +60,11 @@ describe('testsuite of cursor-paginator', () => {
         nodes[1],
         nodes[0],
       ],
-      hasPrev: false,
       hasNext: false,
-      nextCursor: expect.any(String),
-      prevCursor: expect.any(String),
     })
   })
 
-  it('test cursor paginate by single-order', async () => {
+  it('test page paginate by single-order', async () => {
     const repoUsers = connection.getRepository(User)
 
     const nodes = [
@@ -81,7 +78,7 @@ describe('testsuite of cursor-paginator', () => {
 
     await repoUsers.save(nodes)
 
-    const paginator = new CursorPaginator(User, {
+    const paginator = new PagePaginator(User, {
       orderBy: {
         id: false,
       },
@@ -95,57 +92,29 @@ describe('testsuite of cursor-paginator', () => {
         nodes[4],
         nodes[3],
       ],
-      hasPrev: false,
-      hasNext: true,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
-    })
-
-    const paginationPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { prevCursor: pagination.prevCursor })
-    expect(paginationPrev).toEqual({
-      nodes: [
-      ],
-      hasPrev: false,
       hasNext: true,
     })
 
-    const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: pagination.nextCursor })
+    const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { page: 2 })
     expect(paginationNext).toEqual({
       nodes: [
         nodes[2],
         nodes[1],
         nodes[0],
       ],
-      hasPrev: true,
       hasNext: false,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
     })
 
 
-    const paginationNextPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { prevCursor: paginationNext.prevCursor })
-    expect(paginationNextPrev).toEqual({
-      nodes: [
-        nodes[5],
-        nodes[4],
-        nodes[3],
-      ],
-      hasPrev: false,
-      hasNext: true,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
-    })
-
-    const paginationNextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: paginationNext.nextCursor })
+    const paginationNextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { page: 3 })
     expect(paginationNextNext).toEqual({
       nodes: [
       ],
-      hasPrev: true,
       hasNext: false,
     })
   })
 
-  it('test cursor paginate by multi-orders', async () => {
+  it('test page paginate by multi-orders', async () => {
     const repoUsers = connection.getRepository(User)
 
     const nodes = [
@@ -159,7 +128,7 @@ describe('testsuite of cursor-paginator', () => {
 
     await repoUsers.save(nodes)
 
-    const paginator = new CursorPaginator(User, {
+    const paginator = new PagePaginator(User, {
       orderBy: [
         { name: true },
         { id: false },
@@ -176,10 +145,7 @@ describe('testsuite of cursor-paginator', () => {
         nodes[3],
         nodes[0],
       ],
-      hasPrev: false,
       hasNext: false,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
     })
 
     const pagination2 = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2 })
@@ -188,46 +154,25 @@ describe('testsuite of cursor-paginator', () => {
         nodes[2],
         nodes[4],
       ],
-      hasPrev: false,
       hasNext: true,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
     })
 
-    const pagination2Next = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, nextCursor: pagination2.nextCursor })
+    const pagination2Next = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, page: 2 })
     expect(pagination2Next).toEqual({
       nodes: [
         nodes[1],
         nodes[5],
       ],
-      hasPrev: true,
       hasNext: true,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
     })
 
-    const pagination2NextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, nextCursor: pagination2Next.nextCursor })
+    const pagination2NextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, page: 3 })
     expect(pagination2NextNext).toEqual({
       nodes: [
         nodes[3],
         nodes[0],
       ],
-      hasPrev: true,
       hasNext: false,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
-    })
-
-    const pagination2NextNextPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, prevCursor: pagination2NextNext.prevCursor })
-    expect(pagination2NextNextPrev).toEqual({
-      nodes: [
-        nodes[1],
-        nodes[5],
-      ],
-      hasPrev: true,
-      hasNext: true,
-      prevCursor: expect.any(String),
-      nextCursor: expect.any(String),
     })
   })
 })

@@ -109,3 +109,46 @@ expect(resultNextNextPrev).toEqual({
   nextCursor: expect.any(String),
 })
 ```
+
+
+### Page-based Pagination
+
+```typescript
+import { PagePaginator } from 'typeorm-paginator'
+```
+
+Single cursor-based pagination.
+
+```typescript
+const paginator = new PagePaginator(User, {
+  orderBy: {
+    id: false,
+  },
+  take: 3,
+})
+
+const pagination1 = await paginator.paginate(repoUsers.createQueryBuilder())
+
+expect(pagination1).toEqual({
+  nodes: [
+    /*
+    User { id: 5 },
+    User { id: 4 },
+    User { id: 3 },
+    */
+  ],
+  hasNext: true,
+})
+
+const pagination1 = await paginator.paginate(repoUsers.createQueryBuilder(), { page: 2 })
+
+expect(pagination1).toEqual({
+  nodes: [
+    /*
+    User { id: 2 },
+    User { id: 1 },
+    */
+  ],
+  hasNext: false,
+})
+```
