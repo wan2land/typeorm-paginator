@@ -1,4 +1,14 @@
 
+export type Nullable<T> = {
+  [P in keyof T]?: T[P] | null
+}
+
+export interface Take {
+  default: number
+  min: number
+  max: number
+}
+
 export type OrderBy<TEntity> = {
   [TKey in keyof TEntity]?: boolean
 }

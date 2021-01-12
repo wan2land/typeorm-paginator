@@ -1,11 +1,11 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
-import { OrderBy, ColumnNameMap, PagePagination } from './interfaces/paginator'
+import { OrderBy, ColumnNameMap, PagePagination, Nullable, Take } from './interfaces/paginator'
 
 
 export interface PagePaginatorParams<TEntity> {
   orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
   columnNames?: ColumnNameMap<TEntity> | null
-  take?: number | null
+  take?: Nullable<Take> | number | null
 }
 
 export interface PagePaginatorPaginateParams {
@@ -17,7 +17,7 @@ export class PagePaginator<TEntity> {
 
   orders: [keyof TEntity, boolean][] = []
   columnNames: ColumnNameMap<TEntity>
-  take: number
+  takeOptions: Take
 
   constructor(
     public entity: ObjectType<TEntity>,
@@ -33,12 +33,20 @@ export class PagePaginator<TEntity> {
       }
     }
     this.columnNames = columnNames ?? {}
-    this.take = take ?? 20
+    this.takeOptions = typeof take === 'number' ? {
+      default: take,
+      min: 0,
+      max: Infinity,
+    } : {
+      default: take?.default ?? 20,
+      min: Math.max(0, take?.min ?? 0), // never negative
+      max: take?.max ?? Infinity,
+    }
   }
 
   async paginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams = {}): Promise<PagePagination<TEntity>> {
     const page = Math.max(params.page ?? 1, 1)
-    const take = params.take ?? this.take
+    const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
     for (const [key, value] of this.orders) {
       qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'ASC' : 'DESC')

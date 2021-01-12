@@ -1,12 +1,12 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
-import { CursorPagination, Cursor, OrderBy, ColumnNameMap, CursorTransformer } from './interfaces/paginator'
+import { CursorPagination, Cursor, OrderBy, ColumnNameMap, CursorTransformer, Nullable, Take } from './interfaces/paginator'
 import { Base64Transformer } from './transformers/base64-transformer'
 
 
 export interface CursorPaginatorParams<TEntity> {
   orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
   columnNames?: ColumnNameMap<TEntity> | null
-  take?: number | null
+  take?: Nullable<Take> | number | null
   transformer?: CursorTransformer<TEntity> | null
 }
 
@@ -20,7 +20,7 @@ export class CursorPaginator<TEntity> {
 
   orders: [keyof TEntity, boolean][] = []
   columnNames: ColumnNameMap<TEntity>
-  take: number
+  takeOptions: Take
   transformer: CursorTransformer<TEntity>
 
   constructor(
@@ -38,12 +38,20 @@ export class CursorPaginator<TEntity> {
       }
     }
     this.columnNames = columnNames ?? {}
-    this.take = take ?? 20
+    this.takeOptions = typeof take === 'number' ? {
+      default: take,
+      min: 0,
+      max: Infinity,
+    } : {
+      default: take?.default ?? 20,
+      min: Math.max(0, take?.min ?? 0), // never negative
+      max: take?.max ?? Infinity,
+    }
     this.transformer = transformer ?? new Base64Transformer()
   }
 
   async paginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}): Promise<CursorPagination<TEntity>> {
-    const take = params.take ?? this.take
+    const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
     if (params.prevCursor) {
       try {
