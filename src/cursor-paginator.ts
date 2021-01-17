@@ -120,7 +120,7 @@ export class CursorPaginator<TEntity> {
       queryParams[`cursor__${key as string}`] = cursor[key]
     }
 
-    qb.andWhere(queryParts.join(' OR '), queryParams)
+    qb.andWhere(`(${queryParts.join(' OR ')})`, queryParams)
   }
 
   _createCursor(node: TEntity): Cursor<TEntity> {
