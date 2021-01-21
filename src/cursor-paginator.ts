@@ -109,6 +109,8 @@ export class CursorPaginator<TEntity> {
   }
 
   _applyWhereQuery(qb: SelectQueryBuilder<TEntity>, cursor: Cursor<TEntity>, isNext: boolean) {
+    const metadata = qb.expressionMap.mainAlias!.metadata
+
     let queryPrefix = ''
     const queryParts = [] as string[]
     const queryParams = {} as Record<string, any>
@@ -117,7 +119,9 @@ export class CursorPaginator<TEntity> {
       const columnName = this.columnNames[key] ?? `${qb.alias}.${key}`
       queryParts.push(`(${queryPrefix}${columnName} ${!asc !== isNext ? '>' : '<'} :cursor__${key as string})`)
       queryPrefix = `${queryPrefix}${columnName} = :cursor__${key as string} AND `
-      queryParams[`cursor__${key as string}`] = cursor[key]
+
+      const column = metadata.findColumnWithPropertyPath(key as string)
+      queryParams[`cursor__${key as string}`] = column ? qb.connection.driver.preparePersistentValue(cursor[key], column) : cursor[key]
     }
 
     qb.andWhere(`(${queryParts.join(' OR ')})`, queryParams)
