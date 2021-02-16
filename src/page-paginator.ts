@@ -1,4 +1,5 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
+
 import { OrderBy, ColumnNameMap, PagePagination, Nullable, Take } from './interfaces/paginator'
 
 
@@ -53,7 +54,7 @@ export class PagePaginator<TEntity> {
     }
 
     let hasNext = false
-    const nodes = await qb.clone().offset((page - 1) * take).take(take + 1).getMany().then(nodes => {
+    const nodes = await qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
       if (nodes.length > take) {
         hasNext = true
       }
