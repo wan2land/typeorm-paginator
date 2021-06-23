@@ -1,4 +1,5 @@
 import { Column, Connection, createConnection, Entity, PrimaryGeneratedColumn } from 'typeorm'
+
 import { PagePaginator } from './page-paginator'
 
 
@@ -52,6 +53,7 @@ describe('testsuite of page-paginator', () => {
 
     const pagination = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination).toEqual({
+      count: 6,
       nodes: [
         nodes[5],
         nodes[4],
@@ -87,6 +89,7 @@ describe('testsuite of page-paginator', () => {
 
     const pagination = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination).toEqual({
+      count: 6,
       nodes: [
         nodes[5],
         nodes[4],
@@ -97,6 +100,7 @@ describe('testsuite of page-paginator', () => {
 
     const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { page: 2 })
     expect(paginationNext).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[1],
@@ -108,6 +112,7 @@ describe('testsuite of page-paginator', () => {
 
     const paginationNextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { page: 3 })
     expect(paginationNextNext).toEqual({
+      count: 6,
       nodes: [
       ],
       hasNext: false,
@@ -137,6 +142,7 @@ describe('testsuite of page-paginator', () => {
 
     const pagination1 = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination1).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[4],
@@ -150,6 +156,7 @@ describe('testsuite of page-paginator', () => {
 
     const pagination2 = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2 })
     expect(pagination2).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[4],
@@ -159,6 +166,7 @@ describe('testsuite of page-paginator', () => {
 
     const pagination2Next = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, page: 2 })
     expect(pagination2Next).toEqual({
+      count: 6,
       nodes: [
         nodes[1],
         nodes[5],
@@ -168,6 +176,7 @@ describe('testsuite of page-paginator', () => {
 
     const pagination2NextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, page: 3 })
     expect(pagination2NextNext).toEqual({
+      count: 6,
       nodes: [
         nodes[3],
         nodes[0],

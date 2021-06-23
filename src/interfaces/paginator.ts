@@ -35,6 +35,13 @@ export interface CursorTransformer<TEntity> {
 }
 
 export interface PagePagination<TEntity> {
-  nodes: TEntity[]
-  hasNext: boolean
+  readonly count: number
+  readonly nodes: TEntity[]
+  readonly hasNext: boolean
+}
+
+export interface PromisePagePagination<TEntity> {
+  readonly count: Promise<number>
+  readonly nodes: Promise<TEntity[]>
+  readonly hasNext: Promise<boolean>
 }
