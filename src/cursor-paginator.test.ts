@@ -1,4 +1,5 @@
 import { Column, Connection, createConnection, Entity, FindOperator, PrimaryGeneratedColumn } from 'typeorm'
+
 import { CursorPaginator } from './cursor-paginator'
 
 
@@ -153,6 +154,8 @@ describe('testsuite of cursor-paginator', () => {
       ],
       hasPrev: false,
       hasNext: true,
+      prevCursor: null,
+      nextCursor: null,
     })
 
     const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: pagination.nextCursor })
@@ -188,6 +191,8 @@ describe('testsuite of cursor-paginator', () => {
       ],
       hasPrev: true,
       hasNext: false,
+      prevCursor: null,
+      nextCursor: null,
     })
   })
 
@@ -317,6 +322,8 @@ describe('testsuite of cursor-paginator', () => {
       ],
       hasPrev: false,
       hasNext: true,
+      prevCursor: null,
+      nextCursor: null,
     })
 
     const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: pagination.nextCursor })
@@ -352,6 +359,8 @@ describe('testsuite of cursor-paginator', () => {
       ],
       hasPrev: true,
       hasNext: false,
+      prevCursor: null,
+      nextCursor: null,
     })
   })
 })

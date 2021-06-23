@@ -1,4 +1,5 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
+
 import { CursorPagination, Cursor, OrderBy, ColumnNameMap, CursorTransformer, Nullable, Take } from './interfaces/paginator'
 import { Base64Transformer } from './transformers/base64-transformer'
 
@@ -75,8 +76,8 @@ export class CursorPaginator<TEntity> {
         nodes,
         hasPrev,
         hasNext: true,
-        ...nodes.length > 0 ? { prevCursor: this.transformer.stringify(this._createCursor(nodes[0])) } : {},
-        ...nodes.length > 0 ? { nextCursor: this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) } : {},
+        prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
+        nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
       }
     }
 
@@ -103,8 +104,8 @@ export class CursorPaginator<TEntity> {
       nodes: nodes.slice(0, take),
       hasPrev: !!params.nextCursor,
       hasNext,
-      ...nodes.length > 0 ? { prevCursor: this.transformer.stringify(this._createCursor(nodes[0])) } : {},
-      ...nodes.length > 0 ? { nextCursor: this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) } : {},
+      prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
+      nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
     }
   }
 

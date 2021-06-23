@@ -22,11 +22,11 @@ export type Cursor<TEntity> = {
 }
 
 export interface CursorPagination<TEntity> {
-  nodes: TEntity[]
-  hasPrev: boolean
-  hasNext: boolean
-  prevCursor?: string | null
-  nextCursor?: string | null
+  readonly nodes: TEntity[]
+  readonly hasPrev: boolean
+  readonly hasNext: boolean
+  readonly prevCursor: string | null
+  readonly nextCursor: string | null
 }
 
 export interface CursorTransformer<TEntity> {
