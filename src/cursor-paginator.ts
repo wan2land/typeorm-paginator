@@ -1,12 +1,13 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
 
-import { CursorPagination, Cursor, OrderBy, ColumnNameMap, CursorTransformer, Nullable, Take } from './interfaces/paginator'
+import { CursorPagination, Cursor, OrderBy, CursorTransformer, Nullable, Take } from './interfaces/paginator'
 import { Base64Transformer } from './transformers/base64-transformer'
+import { normalizeOrderBy } from './utils/normalizeOrderBy'
 
 
-export interface CursorPaginatorParams<TEntity> {
-  orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
-  columnNames?: ColumnNameMap<TEntity> | null
+export interface CursorPaginatorParams<TEntity, TColumnNames extends Record<string, string>> {
+  orderBy: OrderBy<TEntity & TColumnNames> | OrderBy<TEntity & TColumnNames>[]
+  columnNames?: TColumnNames | null
   take?: Nullable<Take> | number | null
   transformer?: CursorTransformer<TEntity> | null
 }
@@ -17,10 +18,10 @@ export interface CursorPaginatorPaginateParams {
   take?: number | null
 }
 
-export class CursorPaginator<TEntity> {
+export class CursorPaginator<TEntity, TColumnNames extends Record<string, string>> {
 
-  orders: [keyof TEntity, boolean][] = []
-  columnNames: ColumnNameMap<TEntity>
+  orders: [string, boolean][] = []
+  columnNames: Record<string, string>
   takeOptions: Take
   transformer: CursorTransformer<TEntity>
 
@@ -31,13 +32,9 @@ export class CursorPaginator<TEntity> {
       columnNames,
       take,
       transformer,
-    }: CursorPaginatorParams<TEntity>,
+    }: CursorPaginatorParams<TEntity, TColumnNames>,
   ) {
-    for (const order of Array.isArray(orderBy) ? orderBy : [orderBy]) {
-      for (const [key, value] of Object.entries(order)) {
-        this.orders.push([key as keyof TEntity, value as boolean])
-      }
-    }
+    this.orders = normalizeOrderBy(orderBy)
     this.columnNames = columnNames ?? {}
     this.takeOptions = typeof take === 'number' ? {
       default: take,
@@ -118,11 +115,11 @@ export class CursorPaginator<TEntity> {
 
     for (const [key, asc] of this.orders) {
       const columnName = this.columnNames[key] ?? `${qb.alias}.${key}`
-      queryParts.push(`(${queryPrefix}${columnName} ${!asc !== isNext ? '>' : '<'} :cursor__${key as string})`)
-      queryPrefix = `${queryPrefix}${columnName} = :cursor__${key as string} AND `
+      queryParts.push(`(${queryPrefix}${columnName} ${!asc !== isNext ? '>' : '<'} :cursor__${key})`)
+      queryPrefix = `${queryPrefix}${columnName} = :cursor__${key} AND `
 
-      const column = metadata.findColumnWithPropertyPath(key as string)
-      queryParams[`cursor__${key as string}`] = column ? qb.connection.driver.preparePersistentValue(cursor[key], column) : cursor[key]
+      const column = metadata.findColumnWithPropertyPath(key)
+      queryParams[`cursor__${key}`] = column ? qb.connection.driver.preparePersistentValue(cursor[key as keyof TEntity], column) : cursor[key as keyof TEntity]
     }
 
     qb.andWhere(`(${queryParts.join(' OR ')})`, queryParams)
@@ -131,7 +128,7 @@ export class CursorPaginator<TEntity> {
   _createCursor(node: TEntity): Cursor<TEntity> {
     const cursor = {} as Cursor<TEntity>
     for (const [key, _] of this.orders) {
-      cursor[key] = node[key]
+      cursor[key as keyof TEntity] = node[key as keyof TEntity]
     }
     return cursor
   }

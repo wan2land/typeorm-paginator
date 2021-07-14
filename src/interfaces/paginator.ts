@@ -13,10 +13,6 @@ export type OrderBy<TEntity> = {
   [TKey in keyof TEntity]?: boolean
 }
 
-export type ColumnNameMap<TEntity> = {
-  [TKey in keyof TEntity]?: string
-}
-
 export type Cursor<TEntity> = {
   [TKey in keyof TEntity]?: any
 }

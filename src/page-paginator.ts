@@ -1,33 +1,24 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
 
-import { OrderBy, ColumnNameMap, PromisePagePagination, PagePagination, Nullable, Take } from './interfaces/paginator'
+import { OrderBy, PromisePagePagination, PagePagination, Nullable, Take } from './interfaces/paginator'
+import { normalizeOrderBy } from './utils/normalizeOrderBy'
 
 
-function normalizeOrderBy<TEntity>(orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]): [keyof TEntity, boolean][] {
-  const orders = [] as [keyof TEntity, boolean][]
-  for (const order of Array.isArray(orderBy) ? orderBy : [orderBy]) {
-    for (const [key, value] of Object.entries(order)) {
-      orders.push([key as keyof TEntity, value as boolean])
-    }
-  }
-  return orders
-}
-
-export interface PagePaginatorParams<TEntity> {
-  orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
-  columnNames?: ColumnNameMap<TEntity> | null
+export interface PagePaginatorParams<TEntity, TColumnNames extends Record<string, string>> {
+  columnNames?: TColumnNames | null
   take?: Nullable<Take> | number | null
+  orderBy: OrderBy<TEntity & TColumnNames> | OrderBy<TEntity & TColumnNames>[]
 }
 
-export interface PagePaginatorPaginateParams<TEntity> {
+export interface PagePaginatorPaginateParams<TEntity, TColumnNames extends Record<string, string>> {
   page?: number | null
   take?: number | null
-  orderBy?: OrderBy<TEntity> | OrderBy<TEntity>[]
+  orderBy?: OrderBy<TEntity & TColumnNames> | OrderBy<TEntity & TColumnNames>[]
 }
 
-export class PagePaginator<TEntity> {
+export class PagePaginator<TEntity, TColumnNames extends Record<string, string>> {
   orderBy: OrderBy<TEntity> | OrderBy<TEntity>[]
-  columnNames: ColumnNameMap<TEntity>
+  columnNames: Record<string, string>
   takeOptions: Take
 
   constructor(
@@ -36,7 +27,7 @@ export class PagePaginator<TEntity> {
       orderBy,
       columnNames,
       take,
-    }: PagePaginatorParams<TEntity>,
+    }: PagePaginatorParams<TEntity, TColumnNames>,
   ) {
     this.orderBy = orderBy
     this.columnNames = columnNames ?? {}
@@ -51,7 +42,7 @@ export class PagePaginator<TEntity> {
     }
   }
 
-  async paginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity> = {}): Promise<PagePagination<TEntity>> {
+  async paginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity, TColumnNames> = {}): Promise<PagePagination<TEntity>> {
     const page = Math.max(params.page ?? 1, 1)
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
@@ -76,7 +67,7 @@ export class PagePaginator<TEntity> {
     }
   }
 
-  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity> = {}): PromisePagePagination<TEntity> {
+  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity, TColumnNames> = {}): PromisePagePagination<TEntity> {
     const page = Math.max(params.page ?? 1, 1)
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 

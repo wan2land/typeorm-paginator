@@ -184,4 +184,47 @@ describe('testsuite of page-paginator', () => {
       hasNext: false,
     })
   })
+
+  it('test page paginate by custom column name', async () => {
+    const repoUsers = connection.getRepository(User)
+
+    const nodes = [
+      repoUsers.create({ name: 'c' }),
+      repoUsers.create({ name: 'b' }),
+      repoUsers.create({ name: 'a' }),
+      repoUsers.create({ name: 'c' }),
+      repoUsers.create({ name: 'b' }),
+      repoUsers.create({ name: 'c' }),
+    ]
+
+    await repoUsers.save(nodes)
+
+    const paginator = new PagePaginator(User, {
+      columnNames: {
+        customName: 'User.name',
+      },
+      orderBy: [
+        { id: false },
+      ],
+    })
+
+    const pagination1 = await paginator.paginate(repoUsers.createQueryBuilder(), {
+      orderBy: [
+        { customName: true },
+        { id: false },
+      ],
+    })
+    expect(pagination1).toEqual({
+      count: 6,
+      nodes: [
+        nodes[2],
+        nodes[4],
+        nodes[1],
+        nodes[5],
+        nodes[3],
+        nodes[0],
+      ],
+      hasNext: false,
+    })
+  })
 })
