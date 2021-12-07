@@ -18,6 +18,7 @@ export type Cursor<TEntity> = {
 }
 
 export interface CursorPagination<TEntity> {
+  readonly count: number
   readonly nodes: TEntity[]
   readonly hasPrev: boolean
   readonly hasNext: boolean

@@ -51,6 +51,8 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
   async paginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}): Promise<CursorPagination<TEntity>> {
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
+    const qbForCount = qb.clone()
+
     if (params.prevCursor) {
       try {
         this._applyWhereQuery(qb, this.transformer.parse(params.prevCursor), false)
@@ -70,6 +72,7 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
       })
 
       return {
+        count: await qbForCount.getCount(),
         nodes,
         hasPrev,
         hasNext: true,
@@ -98,6 +101,7 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
     })
 
     return {
+      count: await qbForCount.getCount(),
       nodes: nodes.slice(0, take),
       hasPrev: !!params.nextCursor,
       hasNext,

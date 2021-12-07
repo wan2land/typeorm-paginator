@@ -99,6 +99,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination).toEqual({
+      count: 6,
       nodes: [
         nodes[5],
         nodes[4],
@@ -137,6 +138,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination).toEqual({
+      count: 6,
       nodes: [
         nodes[5],
         nodes[4],
@@ -150,6 +152,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { prevCursor: pagination.prevCursor })
     expect(paginationPrev).toEqual({
+      count: 6,
       nodes: [
       ],
       hasPrev: false,
@@ -160,6 +163,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: pagination.nextCursor })
     expect(paginationNext).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[1],
@@ -174,6 +178,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationNextPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { prevCursor: paginationNext.prevCursor })
     expect(paginationNextPrev).toEqual({
+      count: 6,
       nodes: [
         nodes[5],
         nodes[4],
@@ -187,6 +192,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationNextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: paginationNext.nextCursor })
     expect(paginationNextNext).toEqual({
+      count: 6,
       nodes: [
       ],
       hasPrev: true,
@@ -219,6 +225,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination1 = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination1).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[4],
@@ -235,6 +242,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination2 = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2 })
     expect(pagination2).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[4],
@@ -247,6 +255,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination2Next = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, nextCursor: pagination2.nextCursor })
     expect(pagination2Next).toEqual({
+      count: 6,
       nodes: [
         nodes[1],
         nodes[5],
@@ -259,6 +268,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination2NextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, nextCursor: pagination2Next.nextCursor })
     expect(pagination2NextNext).toEqual({
+      count: 6,
       nodes: [
         nodes[3],
         nodes[0],
@@ -271,6 +281,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination2NextNextPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { take: 2, prevCursor: pagination2NextNext.prevCursor })
     expect(pagination2NextNextPrev).toEqual({
+      count: 6,
       nodes: [
         nodes[1],
         nodes[5],
@@ -305,6 +316,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const pagination = await paginator.paginate(repoUsers.createQueryBuilder())
     expect(pagination).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[4],
@@ -318,6 +330,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { prevCursor: pagination.prevCursor })
     expect(paginationPrev).toEqual({
+      count: 6,
       nodes: [
       ],
       hasPrev: false,
@@ -328,6 +341,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: pagination.nextCursor })
     expect(paginationNext).toEqual({
+      count: 6,
       nodes: [
         nodes[3],
         nodes[5],
@@ -342,6 +356,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationNextPrev = await paginator.paginate(repoUsers.createQueryBuilder(), { prevCursor: paginationNext.prevCursor })
     expect(paginationNextPrev).toEqual({
+      count: 6,
       nodes: [
         nodes[2],
         nodes[4],
@@ -355,6 +370,7 @@ describe('testsuite of cursor-paginator', () => {
 
     const paginationNextNext = await paginator.paginate(repoUsers.createQueryBuilder(), { nextCursor: paginationNext.nextCursor })
     expect(paginationNextNext).toEqual({
+      count: 6,
       nodes: [
       ],
       hasPrev: true,
