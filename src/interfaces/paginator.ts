@@ -26,6 +26,15 @@ export interface CursorPagination<TEntity> {
   readonly nextCursor: string | null
 }
 
+export interface PromiseCursorPagination<TEntity> {
+  readonly count: Promise<number>
+  readonly nodes: Promise<TEntity[]>
+  readonly hasPrev: Promise<boolean>
+  readonly hasNext: Promise<boolean>
+  readonly prevCursor: Promise<string | null>
+  readonly nextCursor: Promise<string | null>
+}
+
 export interface CursorTransformer<TEntity> {
   parse(text: string): Cursor<TEntity>
   stringify(cursor: Cursor<TEntity>): string

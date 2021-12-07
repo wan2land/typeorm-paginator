@@ -1,6 +1,6 @@
 import { SelectQueryBuilder, ObjectType } from 'typeorm'
 
-import { CursorPagination, Cursor, OrderBy, CursorTransformer, Nullable, Take } from './interfaces/paginator'
+import { CursorPagination, Cursor, OrderBy, CursorTransformer, Nullable, Take, PromiseCursorPagination } from './interfaces/paginator'
 import { Base64Transformer } from './transformers/base64-transformer'
 import { normalizeOrderBy } from './utils/normalizeOrderBy'
 
@@ -107,6 +107,106 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
       hasNext,
       prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
       nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
+    }
+  }
+
+  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}): PromiseCursorPagination<TEntity> {
+    const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
+
+    const qbForCount = qb.clone()
+
+    if (params.prevCursor) {
+      try {
+        this._applyWhereQuery(qb, this.transformer.parse(params.prevCursor), false)
+      } catch {
+        qb.andWhere('1 = 0')
+      }
+      for (const [key, value] of this.orders) {
+        qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'DESC' : 'ASC')
+      }
+
+      const promiseNodes = () => qb.clone().take(take + 1).getMany().then(nodes => {
+        let hasPrev = false
+        if (nodes.length > take) {
+          hasPrev = true
+        }
+        nodes = nodes.slice(0, take).reverse()
+        return {
+          nodes,
+          hasPrev,
+          hasNext: true,
+          prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
+          nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
+        }
+      })
+
+      return {
+        get count() {
+          return qbForCount.getCount()
+        },
+        get nodes() {
+          return promiseNodes().then(({ nodes }) => nodes)
+        },
+        get hasPrev() {
+          return promiseNodes().then(({ hasPrev }) => hasPrev)
+        },
+        get hasNext() {
+          return promiseNodes().then(({ hasNext }) => hasNext)
+        },
+        get prevCursor() {
+          return promiseNodes().then(({ prevCursor }) => prevCursor)
+        },
+        get nextCursor() {
+          return promiseNodes().then(({ nextCursor }) => nextCursor)
+        },
+      }
+    }
+
+    if (params.nextCursor) {
+      try {
+        this._applyWhereQuery(qb, this.transformer.parse(params.nextCursor), true)
+      } catch {
+        qb.andWhere('1 = 0')
+      }
+    }
+    for (const [key, value] of this.orders) {
+      qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'ASC' : 'DESC')
+    }
+
+    const promiseNodes = () => qb.clone().take(take + 1).getMany().then(nodes => {
+      let hasNext = false
+      if (nodes.length > take) {
+        hasNext = true
+      }
+      nodes = nodes.slice(0, take)
+      return {
+        nodes: nodes.slice(0, take),
+        hasPrev: !!params.nextCursor,
+        hasNext,
+        prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
+        nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
+      }
+    })
+
+    return {
+      get count() {
+        return qbForCount.getCount()
+      },
+      get nodes() {
+        return promiseNodes().then(({ nodes }) => nodes)
+      },
+      get hasPrev() {
+        return promiseNodes().then(({ hasPrev }) => hasPrev)
+      },
+      get hasNext() {
+        return promiseNodes().then(({ hasNext }) => hasNext)
+      },
+      get prevCursor() {
+        return promiseNodes().then(({ prevCursor }) => prevCursor)
+      },
+      get nextCursor() {
+        return promiseNodes().then(({ nextCursor }) => nextCursor)
+      },
     }
   }
 

@@ -46,11 +46,11 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     const page = Math.max(params.page ?? 1, 1)
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
+    const qbForCount = qb.clone()
+
     for (const [key, value] of normalizeOrderBy(params.orderBy ?? this.orderBy)) {
       qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'ASC' : 'DESC')
     }
-
-    const qbForCount = qb.clone()
 
     let hasNext = false
     const nodes = await qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
@@ -71,12 +71,12 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     const page = Math.max(params.page ?? 1, 1)
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
+    const qbForCount = qb.clone()
+
     for (const [key, value] of normalizeOrderBy(params.orderBy ?? this.orderBy)) {
       qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'ASC' : 'DESC')
     }
-
-    const qbForCount = qb.clone()
-    const promiseNodes = qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
+    const promiseNodes = () => qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
       let hasNext = false
       if (nodes.length > take) {
         hasNext = true
@@ -92,10 +92,10 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
         return qbForCount.getCount()
       },
       get nodes() {
-        return promiseNodes.then(({ nodes }) => nodes)
+        return promiseNodes().then(({ nodes }) => nodes)
       },
       get hasNext() {
-        return promiseNodes.then(({ hasNext }) => hasNext)
+        return promiseNodes().then(({ hasNext }) => hasNext)
       },
     }
   }
