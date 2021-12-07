@@ -1,18 +1,5 @@
 module.exports = {
-  globals: {
-    'ts-jest': {
-      babelConfig: '.babelrc',
-    },
-  },
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
-  testRegex: '[^/]*\\.test.tsx?$',
-  moduleFileExtensions: [
-    'ts',
-    'tsx',
-    'js',
-    'jsx',
-    'json',
-  ],
 }

@@ -8,6 +8,7 @@
       "esnext.asynciterable"
     ],
     "outDir": "lib",
+    "emitDeclarationOnly": true,
     "declaration": true,
     "pretty": true,
     "sourceMap": true,

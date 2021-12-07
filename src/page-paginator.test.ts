@@ -201,7 +201,7 @@ describe('testsuite of page-paginator', () => {
 
     const paginator = new PagePaginator(User, {
       columnNames: {
-        customName: 'User.name',
+        customName: 'User_name',
       },
       orderBy: [
         { id: false },
