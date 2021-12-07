@@ -125,20 +125,26 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
         qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'DESC' : 'ASC')
       }
 
-      const promiseNodes = () => qb.clone().take(take + 1).getMany().then(nodes => {
-        let hasPrev = false
-        if (nodes.length > take) {
-          hasPrev = true
+      let cachePromiseNodes = null as Promise<Omit<CursorPagination<any>, 'count'>> | null
+      const promiseNodes = () => {
+        if (!cachePromiseNodes) {
+          cachePromiseNodes = qb.clone().take(take + 1).getMany().then(nodes => {
+            let hasPrev = false
+            if (nodes.length > take) {
+              hasPrev = true
+            }
+            nodes = nodes.slice(0, take).reverse()
+            return {
+              nodes,
+              hasPrev,
+              hasNext: true,
+              prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
+              nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
+            }
+          })
         }
-        nodes = nodes.slice(0, take).reverse()
-        return {
-          nodes,
-          hasPrev,
-          hasNext: true,
-          prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
-          nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
-        }
-      })
+        return cachePromiseNodes
+      }
 
       return {
         get count() {
@@ -173,20 +179,26 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
       qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'ASC' : 'DESC')
     }
 
-    const promiseNodes = () => qb.clone().take(take + 1).getMany().then(nodes => {
-      let hasNext = false
-      if (nodes.length > take) {
-        hasNext = true
+    let cachePromiseNodes = null as Promise<Omit<CursorPagination<any>, 'count'>> | null
+    const promiseNodes = () => {
+      if (!cachePromiseNodes) {
+        cachePromiseNodes = qb.clone().take(take + 1).getMany().then(nodes => {
+          let hasNext = false
+          if (nodes.length > take) {
+            hasNext = true
+          }
+          nodes = nodes.slice(0, take)
+          return {
+            nodes: nodes.slice(0, take),
+            hasPrev: !!params.nextCursor,
+            hasNext,
+            prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
+            nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
+          }
+        })
       }
-      nodes = nodes.slice(0, take)
-      return {
-        nodes: nodes.slice(0, take),
-        hasPrev: !!params.nextCursor,
-        hasNext,
-        prevCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[0])) : null,
-        nextCursor: nodes.length > 0 ? this.transformer.stringify(this._createCursor(nodes[nodes.length - 1])) : null,
-      }
-    })
+      return cachePromiseNodes
+    }
 
     return {
       get count() {

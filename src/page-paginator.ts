@@ -76,16 +76,23 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     for (const [key, value] of normalizeOrderBy(params.orderBy ?? this.orderBy)) {
       qb.addOrderBy(this.columnNames[key] ?? `${qb.alias}.${key}`, value ? 'ASC' : 'DESC')
     }
-    const promiseNodes = () => qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
-      let hasNext = false
-      if (nodes.length > take) {
-        hasNext = true
+
+    let cachePromiseNodes = null as Promise<Omit<PagePagination<any>, 'count'>> | null
+    const promiseNodes = () => {
+      if (!cachePromiseNodes) {
+        cachePromiseNodes = qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
+          let hasNext = false
+          if (nodes.length > take) {
+            hasNext = true
+          }
+          return {
+            hasNext,
+            nodes: nodes.slice(0, take),
+          }
+        })
       }
-      return {
-        hasNext,
-        nodes: nodes.slice(0, take),
-      }
-    })
+      return cachePromiseNodes
+    }
 
     return {
       get count() {
