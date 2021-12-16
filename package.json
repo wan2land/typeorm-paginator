@@ -27,7 +27,7 @@
     "regenerator-runtime": "^0.13.9"
   },
   "devDependencies": {
-    "@swc/cli": "0.1.42",
+    "@swc/cli": "0.1.55",
     "@swc/core": "1.2.118",
     "@swc/jest": "0.1.2",
     "@types/jest": "26.0.5",
