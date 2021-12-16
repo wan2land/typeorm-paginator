@@ -23,6 +23,9 @@
     "test:lint": "eslint src/**/**/*.ts",
     "test:unit": "jest src --runInBand"
   },
+  "dependencies": {
+    "regenerator-runtime": "^0.13.9"
+  },
   "devDependencies": {
     "@swc/cli": "^0.1.42",
     "@swc/core": "^1.2.118",
@@ -33,7 +36,6 @@
     "eslint": "^7.32.0",
     "eslint-config-stable": "^0.9.0",
     "jest": "26.1.0",
-    "regenerator-runtime": "^0.13.9",
     "rimraf": "3.0.2",
     "sqlite3": "5.0.1",
     "typeorm": "0.2.29",
