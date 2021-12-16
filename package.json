@@ -39,6 +39,6 @@
     "rimraf": "3.0.2",
     "sqlite3": "5.0.2",
     "typeorm": "0.2.41",
-    "typescript": "3.9.7"
+    "typescript": "3.9.10"
   }
 }
