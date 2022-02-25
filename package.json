@@ -29,7 +29,7 @@
   "devDependencies": {
     "@swc/cli": "0.1.55",
     "@swc/core": "1.2.145",
-    "@swc/jest": "0.2.18",
+    "@swc/jest": "0.2.19",
     "@types/jest": "26.0.24",
     "@types/node": "12.20.46",
     "browserslist": "4.19.3",
