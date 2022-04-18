@@ -37,7 +37,7 @@
     "eslint-config-stable": "0.9.0",
     "jest": "26.6.3",
     "rimraf": "3.0.2",
-    "sqlite3": "5.0.3",
+    "sqlite3": "5.0.4",
     "typeorm": "0.2.45",
     "typescript": "3.9.10"
   }
