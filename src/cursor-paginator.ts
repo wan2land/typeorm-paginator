@@ -48,7 +48,7 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
     this.transformer = transformer ?? new Base64Transformer()
   }
 
-  async paginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}): Promise<CursorPagination<TEntity>> {
+  async paginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}, isRaw = false): Promise<CursorPagination<TEntity>> {
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
     const qbForCount = qb.clone()
@@ -64,7 +64,8 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
       }
 
       let hasPrev = false
-      const nodes = await qb.clone().take(take + 1).getMany().then(nodes => {
+      const query = qb.clone().take(take + 1)
+      const nodes = await (isRaw? query.getRawMany() : query.getMany()).then(nodes => {
         if (nodes.length > take) {
           hasPrev = true
         }
@@ -93,7 +94,8 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
     }
 
     let hasNext = false
-    const nodes = await qb.clone().take(take + 1).getMany().then(nodes => {
+    const query = qb.clone().take(take + 1)
+    const nodes = await (isRaw? query.getRawMany() : query.getMany()).then(nodes => {
       if (nodes.length > take) {
         hasNext = true
       }
@@ -110,7 +112,7 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
     }
   }
 
-  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}): PromiseCursorPagination<TEntity> {
+  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: CursorPaginatorPaginateParams = {}, isRaw = false): PromiseCursorPagination<TEntity> {
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
     const qbForCount = qb.clone()
@@ -128,7 +130,8 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
       let cachePromiseNodes = null as Promise<Omit<CursorPagination<any>, 'count'>> | null
       const promiseNodes = () => {
         if (!cachePromiseNodes) {
-          cachePromiseNodes = qb.clone().take(take + 1).getMany().then(nodes => {
+          const query = qb.clone().take(take + 1)
+          cachePromiseNodes = (isRaw? query.getRawMany() : query.getMany()).then(nodes => {
             let hasPrev = false
             if (nodes.length > take) {
               hasPrev = true
@@ -182,7 +185,8 @@ export class CursorPaginator<TEntity, TColumnNames extends Record<string, string
     let cachePromiseNodes = null as Promise<Omit<CursorPagination<any>, 'count'>> | null
     const promiseNodes = () => {
       if (!cachePromiseNodes) {
-        cachePromiseNodes = qb.clone().take(take + 1).getMany().then(nodes => {
+        const query = qb.clone().take(take + 1)
+        cachePromiseNodes = (isRaw? query.getRawMany() : query.getMany()).then(nodes => {
           let hasNext = false
           if (nodes.length > take) {
             hasNext = true
