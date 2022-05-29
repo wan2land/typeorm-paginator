@@ -42,7 +42,7 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     }
   }
 
-  async paginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity, TColumnNames> = {}): Promise<PagePagination<TEntity>> {
+  async paginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity, TColumnNames> = {}, isRaw = false): Promise<PagePagination<TEntity>> {
     const page = Math.max(params.page ?? 1, 1)
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
@@ -53,7 +53,8 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     }
 
     let hasNext = false
-    const nodes = await qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
+    const query = qb.clone().offset((page - 1) * take).limit(take + 1)
+    const nodes = await (isRaw? query.getRawMany() : query.getMany()).then(nodes => {
       if (nodes.length > take) {
         hasNext = true
       }
@@ -67,7 +68,7 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     }
   }
 
-  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity, TColumnNames> = {}): PromisePagePagination<TEntity> {
+  promisePaginate(qb: SelectQueryBuilder<TEntity>, params: PagePaginatorPaginateParams<TEntity, TColumnNames> = {}, isRaw = false): PromisePagePagination<TEntity> {
     const page = Math.max(params.page ?? 1, 1)
     const take = Math.max(this.takeOptions.min, Math.min(params.take || this.takeOptions.default, this.takeOptions.max))
 
@@ -80,7 +81,8 @@ export class PagePaginator<TEntity, TColumnNames extends Record<string, string>>
     let cachePromiseNodes = null as Promise<Omit<PagePagination<any>, 'count'>> | null
     const promiseNodes = () => {
       if (!cachePromiseNodes) {
-        cachePromiseNodes = qb.clone().offset((page - 1) * take).limit(take + 1).getMany().then(nodes => {
+        const query = qb.clone().offset((page - 1) * take).limit(take + 1)
+        cachePromiseNodes = (isRaw? query.getRawMany() : query.getMany()).then(nodes => {
           let hasNext = false
           if (nodes.length > take) {
             hasNext = true
